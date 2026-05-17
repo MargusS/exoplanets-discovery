@@ -70,72 +70,72 @@ class TestPlotRawLightcurve:
             Visualizer(sample_lightcurve_df).plot_raw_lightcurve(downsample_factor=0)
 
 
-# class TestPlotPhaseFolded:
-#     def test_returns_go_figure(self, sample_lightcurve_df, known_period, known_t0):
-#         assert isinstance(
-#             Visualizer(sample_lightcurve_df).plot_phase_folded(known_period, known_t0),
-#             go.Figure,
-#         )
+class TestPlotPhaseFolded:
+    def test_returns_go_figure(self, sample_lightcurve_df, known_period, known_t0):
+        assert isinstance(
+            Visualizer(sample_lightcurve_df).plot_phase_folded(known_period, known_t0),
+            go.Figure,
+        )
 
-#     def test_exactly_one_trace(self, sample_lightcurve_df, known_period, known_t0):
-#         fig = Visualizer(sample_lightcurve_df).plot_phase_folded(known_period, known_t0)
-#         assert len(fig.data) == 1
+    def test_exactly_one_trace(self, sample_lightcurve_df, known_period, known_t0):
+        fig = Visualizer(sample_lightcurve_df).plot_phase_folded(known_period, known_t0)
+        assert len(fig.data) == 1
 
-#     def test_trace_point_count_matches_input(
-#         self, sample_lightcurve_df, known_period, known_t0
-#     ):
-#         fig = Visualizer(sample_lightcurve_df).plot_phase_folded(known_period, known_t0)
-#         assert len(fig.data[0].x) == len(sample_lightcurve_df)
+    def test_trace_point_count_matches_input(
+        self, sample_lightcurve_df, known_period, known_t0
+    ):
+        fig = Visualizer(sample_lightcurve_df).plot_phase_folded(known_period, known_t0)
+        assert len(fig.data[0].x) == len(sample_lightcurve_df)
 
-#     def test_phase_values_lower_bound(
-#         self, sample_lightcurve_df, known_period, known_t0
-#     ):
-#         fig = Visualizer(sample_lightcurve_df).plot_phase_folded(known_period, known_t0)
-#         assert np.all(np.array(fig.data[0].x) >= -0.5)
+    def test_phase_values_lower_bound(
+        self, sample_lightcurve_df, known_period, known_t0
+    ):
+        fig = Visualizer(sample_lightcurve_df).plot_phase_folded(known_period, known_t0)
+        assert np.all(np.array(fig.data[0].x) >= -0.5)
 
-#     def test_phase_values_upper_bound(
-#         self, sample_lightcurve_df, known_period, known_t0
-#     ):
-#         fig = Visualizer(sample_lightcurve_df).plot_phase_folded(known_period, known_t0)
-#         assert np.all(np.array(fig.data[0].x) <= 0.5)
+    def test_phase_values_upper_bound(
+        self, sample_lightcurve_df, known_period, known_t0
+    ):
+        fig = Visualizer(sample_lightcurve_df).plot_phase_folded(known_period, known_t0)
+        assert np.all(np.array(fig.data[0].x) <= 0.5)
 
-#     def test_xaxis_label_contains_phase(
-#         self, sample_lightcurve_df, known_period, known_t0
-#     ):
-#         fig = Visualizer(sample_lightcurve_df).plot_phase_folded(known_period, known_t0)
-#         assert "phase" in fig.layout.xaxis.title.text.lower()
+    def test_xaxis_label_contains_phase(
+        self, sample_lightcurve_df, known_period, known_t0
+    ):
+        fig = Visualizer(sample_lightcurve_df).plot_phase_folded(known_period, known_t0)
+        assert "phase" in fig.layout.xaxis.title.text.lower()
 
-#     def test_custom_title_is_applied(
-#         self, sample_lightcurve_df, known_period, known_t0
-#     ):
-#         fig = Visualizer(sample_lightcurve_df).plot_phase_folded(
-#             known_period, known_t0, title="Kepler-10b Phase Fold"
-#         )
-#         assert fig.layout.title.text == "Kepler-10b Phase Fold"
+    def test_custom_title_is_applied(
+        self, sample_lightcurve_df, known_period, known_t0
+    ):
+        fig = Visualizer(sample_lightcurve_df).plot_phase_folded(
+            known_period, known_t0, title="Kepler-10b Phase Fold"
+        )
+        assert fig.layout.title.text == "Kepler-10b Phase Fold"
 
-#     def test_raises_on_non_positive_period(self, sample_lightcurve_df):
-#         with pytest.raises(ValueError, match="period"):
-#             Visualizer(sample_lightcurve_df).plot_phase_folded(period=0.0, t0=0.0)
+    def test_raises_on_non_positive_period(self, sample_lightcurve_df):
+        with pytest.raises(ValueError, match="period"):
+            Visualizer(sample_lightcurve_df).plot_phase_folded(period=0.0, t0=0.0)
 
 
-# class TestPlotFluxHistogram:
-#     def test_returns_go_figure(self, sample_lightcurve_df):
-#         assert isinstance(
-#             Visualizer(sample_lightcurve_df).plot_flux_histogram(), go.Figure
-#         )
+class TestPlotFluxHistogram:
+    def test_returns_go_figure(self, sample_lightcurve_df):
+        assert isinstance(
+            Visualizer(sample_lightcurve_df).plot_flux_histogram(), go.Figure
+        )
 
-#     def test_exactly_one_trace(self, sample_lightcurve_df):
-#         fig = Visualizer(sample_lightcurve_df).plot_flux_histogram()
-#         assert len(fig.data) == 1
+    def test_exactly_one_trace(self, sample_lightcurve_df):
+        fig = Visualizer(sample_lightcurve_df).plot_flux_histogram()
+        assert len(fig.data) == 1
 
-#     def test_trace_is_histogram_type(self, sample_lightcurve_df):
-#         fig = Visualizer(sample_lightcurve_df).plot_flux_histogram()
-#         assert isinstance(fig.data[0], go.Histogram)
+    def test_trace_is_histogram_type(self, sample_lightcurve_df):
+        fig = Visualizer(sample_lightcurve_df).plot_flux_histogram()
+        assert isinstance(fig.data[0], go.Histogram)
 
-#     def test_xaxis_label_contains_flux(self, sample_lightcurve_df):
-#         fig = Visualizer(sample_lightcurve_df).plot_flux_histogram()
-#         assert "flux" in fig.layout.xaxis.title.text.lower()
+    def test_xaxis_label_contains_flux(self, sample_lightcurve_df):
+        fig = Visualizer(sample_lightcurve_df).plot_flux_histogram()
+        assert "flux" in fig.layout.xaxis.title.text.lower()
 
-#     def test_raises_on_zero_nbins(self, sample_lightcurve_df):
-#         with pytest.raises(ValueError):
-#             Visualizer(sample_lightcurve_df).plot_flux_histogram(nbins=0)
+    def test_raises_on_zero_nbins(self, sample_lightcurve_df):
+        with pytest.raises(ValueError):
+            Visualizer(sample_lightcurve_df).plot_flux_histogram(nbins=0)
