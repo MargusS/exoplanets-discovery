@@ -1,6 +1,8 @@
 import pandas as pd
 import plotly.graph_objects as go
 
+from src.eda.phase_folder import PhaseFolding
+
 
 class Visualizer:
     """
@@ -10,101 +12,83 @@ class Visualizer:
     """
 
     def __init__(self, df: pd.DataFrame) -> None:
-        """
-        Parameters
-        ----------
-        df : pd.DataFrame
-            Must contain 'time' and 'flux' columns. Must not be empty.
+        if df.empty:
+            raise ValueError("DataFrame must not be empty.")
+        if "time" not in df.columns:
+            raise ValueError("DataFrame must contain a 'time' column.")
+        if "flux" not in df.columns:
+            raise ValueError("DataFrame must contain a 'flux' column.")
+        self._df = df
+        self._df["flux"] = _normalize_flux(self._df["flux"])
 
-        Raises
-        ------
-        ValueError
-            If 'time' or 'flux' columns are absent, or if the DataFrame is empty.
-        """
-        ...
-
+    # Plotting raw light curve with optional downsampling for performance
     def plot_raw_lightcurve(
         self,
         title: str = "Raw Light Curve",
         downsample_factor: int = 1,
     ) -> go.Figure:
-        """
-        Plot flux vs. time as a single Scatter trace.
 
-        Parameters
-        ----------
-        title : str
-            Figure title, set on fig.layout.title.text.
-        downsample_factor : int
-            If > 1, keeps every Nth row (df.iloc[::downsample_factor]).
-            Must be >= 1; raises ValueError otherwise.
+        if downsample_factor < 1:
+            raise ValueError("downsample_factor must be >= 1.")
 
-        Returns
-        -------
-        go.Figure
-            Single trace. X-axis labeled 'Time (BKJD days)',
-            Y-axis labeled 'Normalized Flux'.
-        """
-        ...
+        fig = go.Figure()
+        fig.add_trace(
+            go.Scatter(
+                x=self._df["time"].iloc[::downsample_factor],
+                y=self._df["flux"].iloc[::downsample_factor],
+                mode="markers",
+            )
+        )
+        fig.update_layout(title_text=title)
+        fig.update_xaxes(title_text="Time (BKJD days)")
+        fig.update_yaxes(title_text="Normalized Flux")
+        return fig
 
+    # Plotting phase-folded light curve to reveal periodic signals, using known period and t0 for Kepler-10b
     def plot_phase_folded(
         self,
         period: float,
         t0: float,
         title: str = "Phase-Folded Light Curve",
     ) -> go.Figure:
-        """
-        Phase-fold the stored light curve and plot phase vs. flux.
 
-        Internally instantiates PhaseFolding(self._df).fold(period, t0).
-        Phase range is normalized to [-0.5, 0.5].
+        folded_df = PhaseFolding(self._df).fold(period, t0)
+        fig = go.Figure()
+        fig.add_trace(
+            go.Scatter(
+                x=folded_df["phase"],
+                y=folded_df["flux"],
+                mode="markers",
+            )
+        )
+        fig.update_layout(title_text=title)
+        fig.update_xaxes(title_text="Phase")
+        fig.update_yaxes(title_text="Normalized Flux")
+        return fig
 
-        Parameters
-        ----------
-        period : float
-            Orbital period in days. Forwarded to PhaseFolding.fold().
-        t0 : float
-            Reference epoch in days. Forwarded to PhaseFolding.fold().
-        title : str
-            Figure title.
-
-        Returns
-        -------
-        go.Figure
-            Single trace. X-axis labeled 'Phase', Y-axis labeled 'Normalized Flux'.
-            Point count equals len(self._df).
-
-        Raises
-        ------
-        ValueError
-            If period <= 0 (propagated from PhaseFolding).
-        """
-        ...
-
+    # Plotting flux histogram to visualize distribution and noise characteristics
     def plot_flux_histogram(
         self,
         nbins: int = 50,
         title: str = "Flux Distribution",
     ) -> go.Figure:
-        """
-        Plot a histogram of flux values to surface outliers and baseline drift.
+        if nbins < 1:
+            raise ValueError("nbins must be >= 1.")
+        fig = go.Figure()
+        fig.add_trace(
+            go.Histogram(
+                x=self._df["flux"],
+                nbinsx=nbins,
+            )
+        )
+        fig.update_layout(title_text=title)
+        fig.update_xaxes(title_text="Normalized Flux")
+        fig.update_yaxes(title_text="Count")
+        return fig
 
-        Parameters
-        ----------
-        nbins : int
-            Number of bins. Must be >= 1.
-        title : str
-            Figure title.
 
-        Returns
-        -------
-        go.Figure
-            Single Histogram trace. X-axis labeled 'Normalized Flux',
-            Y-axis labeled 'Count'.
-
-        Raises
-        ------
-        ValueError
-            If nbins < 1.
-        """
-        ...
+def _normalize_flux(flux: pd.Series) -> pd.Series:
+    median_flux = flux.median()
+    if median_flux == 0:
+        raise ValueError("Median flux is zero, cannot normalize.")
+    return flux / median_flux
